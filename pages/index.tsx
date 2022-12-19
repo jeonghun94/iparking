@@ -26,8 +26,9 @@ export default function Home() {
         <link rel="icon" href="../public/favicon.png" />
       </Head>
       <Image
-        className="-mt-20 mb-10 object-cover"
+        className="-mt-20 mb-8 object-cover flex place-self-start"
         src={Logo}
+        width={370}
         alt={"Next.js Logo"}
         priority
       />
@@ -66,7 +67,7 @@ export default function Home() {
         <p className="text-gray-800">&#169;PARKING CLOUD.</p>
       </div>
 
-      <div className="fixed bottom-0 w-full ">
+      <div className="fixed bottom-0 w-full max-w-xl mx-auto ">
         <Swiper
           loop={true}
           autoplay={{
