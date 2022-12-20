@@ -11,6 +11,8 @@ import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
 import "swiper/css/scrollbar";
+import Link from "next/link";
+import { colors } from "@libs/client/utils";
 
 SwiperCore.use([Autoplay]);
 
@@ -28,7 +30,7 @@ export default function Home() {
       <Image
         className="-mt-20 mb-8 object-cover flex place-self-start"
         src={Logo}
-        width={370}
+        width={360}
         alt={"Next.js Logo"}
         priority
       />
@@ -46,7 +48,7 @@ export default function Home() {
           id="checkbox"
           type="checkbox"
           value=""
-          className="w-4 h-4 accent-red-500 rounded-none bg-gray-100 border-gray-200"
+          className={`w-4 h-4 accent-${colors.primaryColor} rounded-none bg-gray-100 border-gray-200`}
         />
         <label
           htmlFor="checkbox"
@@ -55,14 +57,18 @@ export default function Home() {
           자동 로그인
         </label>
       </div>
-      <button className="w-full my-5 p-4 rounded-md bg-red-500 text-white text-xl font-semibold">
+      <Link
+        className={`w-full  my-5 p-4 rounded-md bg-${colors.primaryColor} text-white text-xl text-center font-semibold`}
+        href={"/search"}
+      >
         로그인
-      </button>
-
+      </Link>
       <div className="flex flex-col justify-center items-center mt-8 space-y-3 text-lg">
         <p>
           아이파킹 고객센터{" "}
-          <strong className="text-red-500 font-semibold">070-5039-1402</strong>
+          <strong className={`text-${colors.primaryColor} font-semibold`}>
+            070-5039-1402
+          </strong>
         </p>
         <p className="text-gray-800">&#169;PARKING CLOUD.</p>
       </div>
