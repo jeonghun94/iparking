@@ -3,6 +3,7 @@ import { useState } from "react";
 import { colors } from "@libs/client/utils";
 import HeaderLogo from "../public/header-logo.png";
 import Banner from "@components/banner";
+import { useRouter } from "next/router";
 
 export default function Search() {
   const initTime = new Intl.DateTimeFormat("ko-kr", {
@@ -12,6 +13,7 @@ export default function Search() {
   }).format(new Date());
 
   const [currentTime, setCurrentTime] = useState(initTime);
+  const router = useRouter();
 
   const refreshTime = () => {
     setCurrentTime(initTime);
@@ -70,6 +72,7 @@ export default function Search() {
             placeholder="1234"
           />
           <button
+            onClick={() => router.push("/search-result")}
             className={`px-6 py-2 rounded-3xl text-lg text-white bg-${colors.primaryColor}`}
           >
             검색
