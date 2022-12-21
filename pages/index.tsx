@@ -1,22 +1,9 @@
 import Logo from "../public/iparking-logo.png";
-import Banner1 from "../public/banner1.png";
-import Banner2 from "../public/banner2.png";
-import Banner3 from "../public/banner3.png";
-import Banner4 from "../public/banner4.png";
 import Image from "next/image";
 import Head from "next/head";
-import { Swiper, SwiperSlide } from "swiper/react";
-import SwiperCore, { Autoplay } from "swiper";
-import "swiper/css";
-import "swiper/css/navigation";
-import "swiper/css/pagination";
-import "swiper/css/scrollbar";
 import Link from "next/link";
 import { colors } from "@libs/client/utils";
-
-SwiperCore.use([Autoplay]);
-
-const banners = [Banner1, Banner2, Banner3, Banner4];
+import Banner from "@components/banner";
 
 export default function Home() {
   return (
@@ -52,7 +39,7 @@ export default function Home() {
         />
         <label
           htmlFor="checkbox"
-          className="ml-2 text-lg font-medium text-gray-500"
+          className="ml-2 text-lg accent- font-medium text-gray-500"
         >
           자동 로그인
         </label>
@@ -73,26 +60,7 @@ export default function Home() {
         <p className="text-gray-800">&#169;PARKING CLOUD.</p>
       </div>
 
-      <div className="fixed bottom-0 w-full max-w-xl mx-auto ">
-        <Swiper
-          loop={true}
-          autoplay={{
-            delay: 3000,
-            disableOnInteraction: false,
-          }}
-        >
-          {banners.map((banner, index) => (
-            <SwiperSlide key={index}>
-              <Image
-                key={index}
-                src={banner}
-                alt={`banner${index + 1} load failed`}
-                className="w-full h-48"
-              />
-            </SwiperSlide>
-          ))}
-        </Swiper>
-      </div>
+      <Banner />
     </div>
   );
 }

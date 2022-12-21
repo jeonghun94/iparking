@@ -1,7 +1,8 @@
 import Image from "next/image";
 import { useState } from "react";
 import { colors } from "@libs/client/utils";
-import HeaderLogo from "../public/header-logo.jpeg";
+import HeaderLogo from "../public/header-logo.png";
+import Banner from "@components/banner";
 
 export default function Search() {
   const initTime = new Intl.DateTimeFormat("ko-kr", {
@@ -20,7 +21,12 @@ export default function Search() {
     <div className="w-full h-screen bg-slate-50">
       <header className="h4 flex justify-between items-center px-5 border-b bg-white">
         <p></p>
-        <Image src={HeaderLogo} alt="header-logo" height={50} />
+        <Image
+          className="py-2"
+          src={HeaderLogo}
+          alt="header-logo"
+          width={300}
+        />
         <svg
           className="w-6 h-6"
           fill="currentColor"
@@ -35,22 +41,36 @@ export default function Search() {
         </svg>
       </header>
 
-      <div className="p-3 bg-white">
+      <div
+        className={`flex justify-between items-center px-3 py-6 bg-${colors.primaryColor} text-white`}
+      >
+        <p
+          className={`px-2.5 py-0.5  rounded-2xl bg-white text-red-500 text-sm`}
+        >
+          긴급공지
+        </p>
+        <p className="font-semibold">
+          [공지] i PARKING 멤버스 고객센터 운영시간 변경 안내
+        </p>
+        <p>21.01.27</p>
+      </div>
+
+      <div className="px-3 py-4 bg-white">
         <select className="w-full h-auto p-2 rounded-md border">
           <option>CGV1</option>
         </select>
       </div>
 
-      <div className="flex flex-col gap-5 items-center px-10 py-5  bg-gray-100 shadow-gray-300 shadow-inner">
-        <p className="text-lg font-semibold">차량번호 4자리를 입력하세요.</p>
+      <div className="flex flex-col gap-5 items-center px-10 py-8  bg-gray-100 shadow-gray-300 shadow-inner">
+        <p className="text-xl font-semibold">차량번호 4자리를 입력하세요.</p>
         <div className="flex gap-3">
           <input
-            className="p-2 placeholder:text-gray-300 text-center text-2xl tracking-widest font-bold  border rounded-3xl bg-white"
+            className={`p-2 placeholder:text-gray-300 text-center text-2xl tracking-widest font-bold  border rounded-3xl bg-white focus:border focus:border-${colors.primaryColor}`}
             type="text"
             placeholder="1234"
           />
           <button
-            className={`px-6 py-2 rounded-3xl text-white bg-${colors.primaryColor}`}
+            className={`px-6 py-2 rounded-3xl text-lg text-white bg-${colors.primaryColor}`}
           >
             검색
           </button>
@@ -66,7 +86,7 @@ export default function Search() {
 
       <div className="p-3 bg-white shadow-md ">
         <div className="w-full flex justify-between items-center">
-          <span className=" font-semibold">할인권 잔여 수량</span>
+          <span className="py-1.5 text-lg font-semibold">할인권 잔여 수량</span>
           <div className="flex space-x-2">
             <span className="text-sm text-gray-500">{currentTime}</span>
             <svg
@@ -91,12 +111,14 @@ export default function Search() {
         </select>
       </div>
 
-      <div className="mt-8 mx-5 p-3 rounded-sm bg-white shadow-md">
+      <div className="mt-8 mx-5 p-4 rounded-sm bg-white shadow-md">
         <div className="flex justify-between items-center">
-          <p className={`flex text-${colors.primaryColor} font-semibold`}>
+          <p
+            className={`flex text-xl text-${colors.primaryColor} font-semibold`}
+          >
             3시간할인
             <span
-              className={`ml-3 px-2 py-1 rounded-2xl bg-${colors.primaryColor} text-white text-xs font-normal items-center`}
+              className={`ml-3 px-3 py-1 rounded-2xl bg-${colors.primaryColor} text-white text-sm font-normal items-center`}
             >
               현재기준
             </span>
@@ -117,21 +139,23 @@ export default function Search() {
           </svg>
         </div>
 
-        <div className="flex items-center w-full my-3">
+        <div className="flex items-center w-full my-4">
           <div className="flex justify-between items-center w-1/2">
-            <p className="text-sm text-gray-500">잔여</p>
+            <p className="text-lg font-semibold">잔여</p>
             <p className="text-2xl font-semibold">무제한</p>
           </div>
           <p className="mx-3 text-gray-200">&#124;</p>
           <div className="flex justify-between items-center w-1/2">
-            <p className="text-sm text-gray-500">금일 사용</p>
+            <p className="text-lg font-semibold">금일 사용</p>
             <p className="text-2xl font-semibold">111</p>
           </div>
         </div>
-        <select className="w-full h-auto my-0 p-2 rounded-md border text-center text-sm text-gray-600">
+
+        <select className="w-full h-auto mt-1 p-2 rounded-md border text-center text-sm text-gray-600">
           <option>사용시간 : 00:00 ~ 23:59</option>
         </select>
       </div>
+      <Banner />
     </div>
   );
 }
