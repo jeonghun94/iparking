@@ -67,7 +67,7 @@ export default function Layout({ commonBar, children, seoTitle }: LayoutProps) {
           </div>
         </header>
       ) : null}
-      <main className="relative top-14 h-full border-b p-3">{children}</main>
+      <main className="relative top-14 h-full  p-3">{children}</main>
       {/* {bottomBar ? (
         <button
           className={`fixed bottom-0 w-full py-4 bg-${colors.primaryColor} text-lg font-semibold text-white`}

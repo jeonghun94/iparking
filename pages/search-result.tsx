@@ -2,78 +2,32 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import { colors } from "@libs/client/utils";
 import Layout from "@components/layout";
+import NoImage from "../public/no-image.jpeg";
+import { NextPage, NextPageContext } from "next";
+import { Enter } from "@prisma/client";
+import client from "@libs/server/client";
 
 interface CarInfo {
-  inSeqNo?: number;
+  id?: number;
   carNo?: string;
   inTime?: string;
   imageUrl?: string;
 }
 
-export default function SearchResult() {
+interface PageResponse extends Enter {
+  enter: boolean;
+  enters: Enter[];
+}
+
+const SearchResult: NextPage<PageResponse> = ({ enter, enters }) => {
   const [focusCarInfo, setFocusCarInfo] = useState<CarInfo>({});
-  const fakeData = [
-    {
-      inSeqNo: 1,
-      carNo: "11가1111",
-      inTime: "22.12.21 12:00",
-      imageUrl: "http:naver1.com",
-    },
-    {
-      inSeqNo: 2,
-      carNo: "11가2222",
-      inTime: "22.12.21 12:00",
-      imageUrl: "http:naver2.com",
-    },
-    {
-      inSeqNo: 3,
-      carNo: "11가3333",
-      inTime: "22.12.21 12:00",
-      imageUrl: "http:naver3.com",
-    },
-    {
-      inSeqNo: 4,
-      carNo: "11가4444",
-      inTime: "22.12.21 12:00",
-      imageUrl: "http:naver4.com",
-    },
-    {
-      inSeqNo: 5,
-      carNo: "11가5555",
-      inTime: "22.12.21 12:00",
-      imageUrl: "http:naver5.com",
-    },
-    {
-      inSeqNo: 6,
-      carNo: "11가6666",
-      inTime: "22.12.21 12:00",
-      imageUrl: "http:naver6.com",
-    },
-    {
-      inSeqNo: 7,
-      carNo: "11가7777",
-      inTime: "22.12.21 12:00",
-      imageUrl: "http:naver7.com",
-    },
-    {
-      inSeqNo: 8,
-      carNo: "11가8888",
-      inTime: "22.12.21 12:00",
-      imageUrl: "http:naver8.com",
-    },
-    {
-      inSeqNo: 9,
-      carNo: "11가9999",
-      inTime: "22.12.21 12:00",
-      imageUrl: "http:naver9.com",
-    },
-    {
-      inSeqNo: 10,
-      carNo: "11가0000",
-      inTime: "22.12.21 12:00",
-      imageUrl: "http:naver10.com",
-    },
-  ];
+  const [imageUrl, setImageUrl] = useState<string>(
+    enter ? enters[0].imageUrl : ""
+  );
+
+  useEffect(() => {
+    enter ? setFocusCarInfo(enters[0]) : null;
+  }, [enter]);
 
   return (
     <>
@@ -90,16 +44,22 @@ export default function SearchResult() {
             </p>
           </div>
           <div className={`my-3`}>
-            <div className="h-52 w-96 rounded-xl bg-slate-400">
-              {focusCarInfo.imageUrl ? (
-                // <Image
-                //   src={focusCarInfo.imageUrl}
-                //   alt="Picture of the author"
-                //   className={`rounded-xl`}
-                // />
-                <p>{focusCarInfo.imageUrl}</p>
-              ) : null}
-            </div>
+            <Image
+              className={`h-52 w-96 rounded-xl`}
+              src={
+                !enter
+                  ? imageUrl === ""
+                    ? NoImage
+                    : imageUrl
+                  : imageUrl === ""
+                  ? NoImage
+                  : imageUrl
+              }
+              width={400}
+              height={300}
+              alt="image loading error"
+              priority
+            />
           </div>
           <div className={`text-center text-lg `}>
             주차비 할인을 적용할 차량을 선택하세요.
@@ -113,58 +73,72 @@ export default function SearchResult() {
           <div className="col-span-4">차량번호</div>
           <div className="col-span-4">입차일시</div>
         </div>
-        {fakeData.map((data, index) => (
-          <button
-            key={index}
-            onClick={() => setFocusCarInfo(data)}
-            className={`mt-2 grid w-full grid-cols-9 gap-0 py-3 text-center text-lg focus:border-[1.5px] focus:border-red-500`}
-          >
-            <div className={`place-self-center`}>
-              {focusCarInfo.inSeqNo === data.inSeqNo ? (
-                <svg
-                  className={`h-6 w-6 text-${colors.primaryColor}`}
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M5 13l4 4L19 7"
-                  />
-                </svg>
-              ) : null}
-            </div>
-            <div
-              className={`col-span-4 ${
-                focusCarInfo.inSeqNo === data.inSeqNo
-                  ? `text-${colors.primaryColor}`
-                  : ""
+
+        <div className="mb-16">
+          {enters.map((data, index) => (
+            <button
+              key={index}
+              onClick={() => {
+                setFocusCarInfo(data);
+                setImageUrl(data.imageUrl);
+              }}
+              className={`text-md  grid w-full grid-cols-9 gap-0 py-4 text-center ${
+                focusCarInfo.id === data.id
+                  ? `border-[1.5px] border-red-500`
+                  : null
               }`}
             >
-              {data.carNo}
-            </div>
-            <div
-              className={`col-span-4 ${
-                focusCarInfo.inSeqNo === data.inSeqNo
-                  ? `text-${colors.primaryColor}`
-                  : ""
-              }`}
-            >
-              {data.inTime}
-            </div>
-          </button>
-        ))}
+              <div className={`place-self-center`}>
+                {focusCarInfo.id === data.id ? (
+                  <svg
+                    className={`h-6 w-6 text-${colors.primaryColor}`}
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M5 13l4 4L19 7"
+                    />
+                  </svg>
+                ) : null}
+              </div>
+              <div
+                className={`col-span-4 ${
+                  focusCarInfo.id === data.id
+                    ? `text-${colors.primaryColor}`
+                    : ""
+                }`}
+              >
+                {data.carNumber}
+              </div>
+              <div
+                className={`col-span-4 ${
+                  focusCarInfo.id === data.id
+                    ? `text-${colors.primaryColor}`
+                    : ""
+                }`}
+              >
+                {new Intl.DateTimeFormat("ko-kr", {
+                  dateStyle: "medium",
+                  timeStyle: "short",
+                  timeZone: "Asia/Seoul",
+                }).format(new Date(data.createdAt))}
+              </div>
+            </button>
+          ))}
+        </div>
       </Layout>
       <button
         onClick={() => {
           console.log(focusCarInfo);
         }}
-        disabled={focusCarInfo.inSeqNo ? false : true}
+        disabled={focusCarInfo.id ? false : true}
         className={`fixed bottom-0 w-full py-4  ${
-          focusCarInfo.inSeqNo
+          focusCarInfo.id
             ? `bg-${colors.primaryColor} cursor-pointer`
             : `cursor-not-allowed bg-gray-300`
         }  text-lg font-semibold text-white`}
@@ -173,4 +147,39 @@ export default function SearchResult() {
       </button>
     </>
   );
+};
+
+export async function getServerSideProps(context: NextPageContext) {
+  const {
+    query: { carNumber },
+  } = context;
+
+  let enter = true;
+  let enters = await client.enter.findMany({
+    where: {
+      carNumber: {
+        contains: carNumber as string,
+      },
+    },
+    take: 10,
+  });
+
+  if (enters?.length === 0) {
+    enter = false;
+    enters = await client?.enter.findMany({
+      take: 10,
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+  }
+
+  return {
+    props: {
+      enter,
+      enters: JSON.parse(JSON.stringify(enters)),
+    },
+  };
 }
+
+export default SearchResult;

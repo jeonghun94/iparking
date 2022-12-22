@@ -17,7 +17,7 @@ const banners = [Banner1, Banner2, Banner3, Banner4];
 
 export default function Banner() {
   return (
-    <div className="fixed bottom-0 w-full max-w-xl mx-auto ">
+    <div className="fixed bottom-0 mx-auto w-full max-w-xl ">
       <Swiper
         loop={true}
         autoplay={{
@@ -31,7 +31,8 @@ export default function Banner() {
               key={index}
               src={banner}
               alt={`banner${index + 1} load failed`}
-              className="w-full h-48"
+              className="h-48 w-full"
+              priority
             />
           </SwiperSlide>
         ))}

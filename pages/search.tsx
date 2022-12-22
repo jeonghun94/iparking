@@ -4,8 +4,15 @@ import { colors } from "@libs/client/utils";
 import HeaderLogo from "../public/header-logo.png";
 import Banner from "@components/banner";
 import { useRouter } from "next/router";
+import { useForm } from "react-hook-form";
+
+interface EnterForm {
+  carNumber: string;
+}
 
 export default function Search() {
+  const router = useRouter();
+
   const initTime = new Intl.DateTimeFormat("ko-kr", {
     dateStyle: "medium",
     timeStyle: "short",
@@ -13,15 +20,27 @@ export default function Search() {
   }).format(new Date());
 
   const [currentTime, setCurrentTime] = useState(initTime);
-  const router = useRouter();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<EnterForm>();
 
   const refreshTime = () => {
     setCurrentTime(initTime);
   };
 
+  const onVaild = (data: EnterForm) => {
+    const { carNumber } = data;
+    router.push({
+      pathname: "/search-result",
+      query: { carNumber },
+    });
+  };
+
   return (
-    <div className="w-full h-screen bg-slate-50">
-      <header className="h4 flex justify-between items-center px-5 border-b bg-white">
+    <div className="h-screen w-full bg-slate-50">
+      <header className="h4 flex items-center justify-between border-b bg-white px-5">
         <p></p>
         <Image
           className="py-2"
@@ -30,7 +49,7 @@ export default function Search() {
           width={300}
         />
         <svg
-          className="w-6 h-6"
+          className="h-6 w-6"
           fill="currentColor"
           viewBox="0 0 20 20"
           xmlns="http://www.w3.org/2000/svg"
@@ -44,10 +63,10 @@ export default function Search() {
       </header>
 
       <div
-        className={`flex justify-between items-center px-3 py-6 bg-${colors.primaryColor} text-white`}
+        className={`flex items-center justify-between px-3 py-6 bg-${colors.primaryColor} text-white`}
       >
         <p
-          className={`px-2.5 py-0.5  rounded-2xl bg-white text-red-500 text-sm`}
+          className={`rounded-2xl bg-white  px-2.5 py-0.5 text-sm text-red-500`}
         >
           긴급공지
         </p>
@@ -57,44 +76,67 @@ export default function Search() {
         <p>21.01.27</p>
       </div>
 
-      <div className="px-3 py-4 bg-white">
-        <select className="w-full h-auto p-2 rounded-md border">
+      <div className="bg-white px-3 py-4">
+        <select className="h-auto w-full rounded-md border p-2">
           <option>CGV1</option>
         </select>
       </div>
 
-      <div className="flex flex-col gap-5 items-center px-10 py-8  bg-gray-100 shadow-gray-300 shadow-inner">
-        <p className="text-xl font-semibold">차량번호 4자리를 입력하세요.</p>
-        <div className="flex gap-3">
-          <input
-            className={`p-2 placeholder:text-gray-300 text-center text-2xl tracking-widest font-bold  border rounded-3xl bg-white focus:border focus:border-${colors.primaryColor}`}
-            type="text"
-            placeholder="1234"
-          />
-          <button
-            onClick={() => router.push("/search-result")}
-            className={`px-6 py-2 rounded-3xl text-lg text-white bg-${colors.primaryColor}`}
-          >
-            검색
-          </button>
-        </div>
-        <div>
-          <p className={`text-${colors.primaryColor} text-sm text-center`}>
-            ※ 입차 시에 차량번호가 잘못 인식된 경우,
-            <br />
-            검색 결과가 나오지 않을 수 있습니다.
-          </p>
-        </div>
-      </div>
+      <form onSubmit={handleSubmit(onVaild)}>
+        <div className="flex flex-col items-center gap-5 bg-gray-100 px-10  py-8 shadow-inner shadow-gray-300">
+          {errors.carNumber && (
+            <p className={`text-center text-sm text-red-500`}>
+              {errors.carNumber.message}
+            </p>
+          )}
+          <p className="text-xl font-semibold">차량번호 4자리를 입력하세요.</p>
+          <div className="flex gap-3">
+            <input
+              type={"number"}
+              defaultValue={""}
+              className={`rounded-3xl border bg-white p-2 text-center text-2xl  font-bold tracking-widest placeholder:text-gray-300 focus:border focus:border-${colors.primaryColor}`}
+              placeholder="1234"
+              {...register("carNumber", {
+                required: {
+                  value: true,
+                  message: "차량번호를 입력해주세요.",
+                },
+                minLength: {
+                  value: 4,
+                  message: "4자리를 입력해주세요.",
+                },
+              })}
+              onChange={(e) => {
+                if (e.target.value.length > 4) {
+                  e.target.value = e.target.value.substring(0, 4);
+                }
+              }}
+            />
+            <button
+              className={`rounded-3xl px-6 py-2 text-lg text-white bg-${colors.primaryColor}`}
+            >
+              검색
+            </button>
+          </div>
 
-      <div className="p-3 bg-white shadow-md ">
-        <div className="w-full flex justify-between items-center">
+          <div>
+            <p className={`text-${colors.primaryColor} text-center text-sm`}>
+              ※ 입차 시에 차량번호가 잘못 인식된 경우,
+              <br />
+              검색 결과가 나오지 않을 수 있습니다.
+            </p>
+          </div>
+        </div>
+      </form>
+
+      <div className="bg-white p-3 shadow-md ">
+        <div className="flex w-full items-center justify-between">
           <span className="py-1.5 text-lg font-semibold">할인권 잔여 수량</span>
           <div className="flex space-x-2">
             <span className="text-sm text-gray-500">{currentTime}</span>
             <svg
               onClick={refreshTime}
-              className="w-5 h-5 p-1 bg-gray-400 rounded-full text-white cursor-pointer"
+              className="h-5 w-5 cursor-pointer rounded-full bg-gray-400 p-1 text-white"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -109,25 +151,25 @@ export default function Search() {
             </svg>
           </div>
         </div>
-        <select className="w-full h-auto my-3 p-2 rounded-md border">
+        <select className="my-3 h-auto w-full rounded-md border p-2">
           <option>타임스퀘어[영등포점]</option>
         </select>
       </div>
 
-      <div className="mt-8 mx-5 p-4 rounded-sm bg-white shadow-md">
-        <div className="flex justify-between items-center">
+      <div className="mx-5 mt-8 rounded-sm bg-white p-4 shadow-md">
+        <div className="flex items-center justify-between">
           <p
             className={`flex text-xl text-${colors.primaryColor} font-semibold`}
           >
             3시간할인
             <span
-              className={`ml-3 px-3 py-1 rounded-2xl bg-${colors.primaryColor} text-white text-sm font-normal items-center`}
+              className={`ml-3 rounded-2xl px-3 py-1 bg-${colors.primaryColor} items-center text-sm font-normal text-white`}
             >
               현재기준
             </span>
           </p>
           <svg
-            className="w-4 h-4 text-gray-400"
+            className="h-4 w-4 text-gray-400"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -142,23 +184,25 @@ export default function Search() {
           </svg>
         </div>
 
-        <div className="flex items-center w-full my-4">
-          <div className="flex justify-between items-center w-1/2">
+        <div className="my-4 flex w-full items-center">
+          <div className="flex w-1/2 items-center justify-between">
             <p className="text-lg font-semibold">잔여</p>
             <p className="text-2xl font-semibold">무제한</p>
           </div>
           <p className="mx-3 text-gray-200">&#124;</p>
-          <div className="flex justify-between items-center w-1/2">
+          <div className="flex w-1/2 items-center justify-between">
             <p className="text-lg font-semibold">금일 사용</p>
             <p className="text-2xl font-semibold">111</p>
           </div>
         </div>
 
-        <select className="w-full h-auto mt-1 p-2 rounded-md border text-center text-sm text-gray-600">
+        <select className="mt-1 h-auto w-full rounded-md border p-2 text-center text-sm text-gray-600">
           <option>사용시간 : 00:00 ~ 23:59</option>
         </select>
       </div>
-      <Banner />
+      <div className="flex justify-center">
+        <Banner />
+      </div>
     </div>
   );
 }
