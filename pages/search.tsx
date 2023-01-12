@@ -66,7 +66,7 @@ export default function Search() {
         className={`flex items-center justify-between px-3 py-6 bg-${colors.primaryColor} text-white`}
       >
         <p
-          className={`rounded-2xl bg-white  px-2.5 py-0.5 text-sm text-red-500`}
+          className={`rounded-2xl bg-white  px-2.5 py-0.5 text-xs text-red-500`}
         >
           긴급공지
         </p>
