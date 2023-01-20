@@ -2,12 +2,12 @@ import Logo from "../public/iparking-logo.png";
 import Image from "next/image";
 import Head from "next/head";
 import Link from "next/link";
-import { colors } from "@libs/client/utils";
+import { cls, colors } from "@libs/client/utils";
 import Banner from "@components/banner";
 
 export default function Home() {
   return (
-    <div className="w-full max-w-md mx-auto h-screen flex flex-col justify-center items-center p-3">
+    <div className="mx-auto flex h-screen w-full max-w-md flex-col items-center justify-center p-3">
       <Head>
         <title>i PARKING - MEMBERS</title>
         <meta name="description" content="i PARKING - MEMBERS" />
@@ -15,7 +15,7 @@ export default function Home() {
         <link rel="icon" href="../public/favicon.png" />
       </Head>
       <Image
-        className="-mt-20 mb-8 object-cover flex place-self-start"
+        className="-mt-20 mb-8 flex place-self-start object-cover"
         src={Logo}
         width={360}
         alt={"Next.js Logo"}
@@ -23,34 +23,36 @@ export default function Home() {
       />
 
       <input
-        className="w-full px-4 py-3 text-lg rounded-t-md border border-gray-400"
+        className="w-full rounded-t-md border border-gray-400 px-4 py-3 text-lg"
         placeholder="아이디"
       />
       <input
-        className="w-full px-4 py-3 text-lg rounded-b-md border border-t-0 border-gray-400"
+        className="w-full rounded-b-md border border-t-0 border-gray-400 px-4 py-3 text-lg"
         placeholder="비밀번호"
       />
-      <div className="w-full flex items-center my-4">
+      <div className="my-4 flex w-full items-center">
         <input
           id="checkbox"
           type="checkbox"
           value=""
-          className={`w-4 h-4 accent-${colors.primaryColor} rounded-none bg-gray-100 border-gray-200`}
+          className={`h-4 w-4 accent-${colors.primaryColor} rounded-none border-gray-200 bg-gray-100`}
         />
         <label
           htmlFor="checkbox"
-          className="ml-2 text-lg accent- font-medium text-gray-500"
+          className="accent- ml-2 text-lg font-medium text-gray-500"
         >
           자동 로그인
         </label>
       </div>
       <Link
-        className={`w-full  my-5 p-4 rounded-md bg-${colors.primaryColor} text-white text-xl text-center font-semibold`}
+        className={cls(
+          `my-5  w-full rounded-md bg-red-500  p-4 text-center text-xl font-semibold text-white hover:bg-red-600`
+        )}
         href={"/search"}
       >
         로그인
       </Link>
-      <div className="flex flex-col justify-center items-center mt-8 space-y-3 text-lg">
+      <div className="mt-8 flex flex-col items-center justify-center space-y-3 text-lg">
         <p>
           아이파킹 고객센터{" "}
           <strong className={`text-${colors.primaryColor} font-semibold`}>

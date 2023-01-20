@@ -6,6 +6,8 @@ import NoImage from "../public/no-image.jpeg";
 import { NextPage, NextPageContext } from "next";
 import { Enter } from "@prisma/client";
 import client from "@libs/server/client";
+import { useRouter } from "next/router";
+import { ParkingLotHeader } from "@components/parkingLotHeader";
 
 interface CarInfo {
   id?: number;
@@ -20,6 +22,7 @@ interface PageResponse extends Enter {
 }
 
 const SearchResult: NextPage<PageResponse> = ({ enter, enters }) => {
+  const router = useRouter();
   const [focusCarInfo, setFocusCarInfo] = useState<CarInfo>({});
   const [imageUrl, setImageUrl] = useState<string>(
     enter ? enters[0].imageUrl : ""
@@ -33,16 +36,7 @@ const SearchResult: NextPage<PageResponse> = ({ enter, enters }) => {
     <>
       <Layout commonBar>
         <div className={`flex flex-col items-center gap-3`}>
-          <div className={`w-full bg-gray-50 p-4 `}>
-            <p className="text-center text-lg font-semibold">
-              <span
-                className={`mr-1 px-1 bg-${colors.primaryColor} text-md text-white`}
-              >
-                P
-              </span>
-              타임스퀘어[영등포점]
-            </p>
-          </div>
+          <ParkingLotHeader />
           <div className={`my-3`}>
             <Image
               className={`h-52 w-96 rounded-xl`}
@@ -134,7 +128,15 @@ const SearchResult: NextPage<PageResponse> = ({ enter, enters }) => {
       </Layout>
       <button
         onClick={() => {
-          console.log(focusCarInfo);
+          router.push(
+            {
+              pathname: "/discount",
+              query: {
+                id: focusCarInfo.id,
+              },
+            }
+            // "/discount"
+          );
         }}
         disabled={focusCarInfo.id ? false : true}
         className={`fixed bottom-0 w-full py-4  ${
