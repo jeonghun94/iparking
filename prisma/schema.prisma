@@ -23,32 +23,52 @@ model ParkingLot {
 }
 
 model User {
-  id        Int      @id @default(autoincrement())
-  phone     Int?     @unique
-  email     String?  @unique
+  id        Int               @id @default(autoincrement())
+  phone     Int?              @unique
+  email     String?           @unique
   name      String
   avatar    String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+  discounts DisocuntHistory[]
 }
 
 model Enter {
-  id           Int        @id @default(autoincrement())
-  carNumber    String
-  imageUrl     String
-  parkingLot   ParkingLot @relation(fields: [parkingLotId], references: [id])
-  parkingLotId Int
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @updatedAt
+  id              Int               @id @default(autoincrement())
+  carNumber       String
+  imageUrl        String
+  parkingLot      ParkingLot        @relation(fields: [parkingLotId], references: [id])
+  parkingLotId    Int
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  DisocuntHistory DisocuntHistory[]
 
   @@index([parkingLotId])
 }
 
 model Coupon {
+  id              Int               @id @default(autoincrement())
+  name            String
+  type            Int
+  value           Int
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  DisocuntHistory DisocuntHistory[]
+}
+
+model DisocuntHistory {
   id        Int      @id @default(autoincrement())
-  name      String
-  type      Int
-  value     Int
+  user      User     @relation(fields: [userId], references: [id])
+  userId    Int
+  coupon    Coupon   @relation(fields: [couponId], references: [id])
+  couponId  Int
+  enter     Enter    @relation(fields: [enterId], references: [id])
+  enterId   Int
+  memo      String?  @db.MediumText
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([couponId])
+  @@index([enterId])
 }
