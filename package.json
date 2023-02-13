@@ -25,6 +25,7 @@
     "react-hook-form": "^7.41.0",
     "request": "^2.88.2",
     "swiper": "^8.4.5",
+    "swr": "^2.0.1",
     "typescript": "4.9.4"
   },
   "devDependencies": {

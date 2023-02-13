@@ -1,36 +1,66 @@
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import { colors, convertTime, convertTimeIntl } from "@libs/client/utils";
+import {
+  calculateEnterTime,
+  colors,
+  convertTime,
+  convertTimeIntl,
+} from "@libs/client/utils";
 import Layout from "@components/layout";
 import NoImage from "../public/no-image.jpeg";
 import { NextPage, NextPageContext } from "next";
-import { Coupon, DisocuntHistory, Enter } from "@prisma/client";
+import { Coupon, DiscountHistory, Enter } from "@prisma/client";
 import client from "@libs/server/client";
 import { useRouter } from "next/router";
 import { ParkingLotHeader } from "@components/parkingLotHeader";
 import { useForm } from "react-hook-form";
 import useMutation from "@libs/client/useMutation";
-
+import useSWR, { SWRConfig } from "swr";
+import css from "styled-jsx/css";
 interface DiscountProps {
   carInfo: Enter;
   coupons: Coupon[];
+  history: {
+    ok: boolean;
+    data: countWithCoupon[];
+  };
+}
+
+interface countWithCoupon {
+  count: number;
+  name: string;
+  userId: number;
 }
 
 interface DiscountResponse {
   ok: boolean;
-  data: DisocuntHistory[];
+  data: countWithCoupon[];
 }
 
-const Discount: NextPage<DiscountProps> = ({ carInfo, coupons }) => {
+const Discount: NextPage<DiscountProps> = ({ carInfo, coupons, history }) => {
   const router = useRouter();
+  const [discounts, setDiscounts] = useState<countWithCoupon[]>([]);
+
+  useEffect(() => setDiscounts(history.data), []);
+
+  // get object name in discounts
+  const getDiscountName = (name: string) => {
+    const discountName = discounts.find((discount) => discount.name === name);
+    return discountName ? discountName.count : 0;
+  };
+
+  console.log(discounts);
 
   const [discount, { data: tData, loading }] =
     useMutation<DiscountResponse>("/api/discount");
 
-  const { register, handleSubmit, setValue, reset } = useForm();
+  const [coupon, setCoupon] = useState({ id: 0, name: "" });
+
+  const { register, handleSubmit, reset } = useForm();
   const [popup, setPopup] = useState(false);
-  const t = () => {
+  const t = (coupon: Coupon) => {
     setPopup(true);
+    setCoupon({ id: coupon.id, name: coupon.name });
   };
 
   const closePopup = () => {
@@ -39,9 +69,8 @@ const Discount: NextPage<DiscountProps> = ({ carInfo, coupons }) => {
   };
 
   const onVaild = (data: any) => {
-    discount({ ...data, enterId: carInfo.id });
+    discount({ ...data, enterId: carInfo.id, couponId: coupon.id });
     if (tData) {
-      console.log(tData.data);
       setPopup(false);
       reset();
     }
@@ -57,13 +86,13 @@ const Discount: NextPage<DiscountProps> = ({ carInfo, coupons }) => {
             <div className="relative w-full">
               <Image
                 src={carInfo.imageUrl ? carInfo.imageUrl : NoImage}
-                className="h-36 w-56 rounded-xl"
+                className="h-40 w-56 rounded-md"
                 width={400}
                 height={100}
                 alt="image loading error"
                 priority
               />
-              <p className="absolute bottom-0 w-56 rounded-br-xl rounded-bl-xl bg-gray-700 bg-opacity-30 py-2 text-center text-white">
+              <p className="absolute bottom-0 w-56 rounded-br-md rounded-bl-xl bg-gray-700 bg-opacity-10 py-2 text-center font-semibold text-white">
                 {carInfo.carNumber}
               </p>
             </div>
@@ -72,7 +101,7 @@ const Discount: NextPage<DiscountProps> = ({ carInfo, coupons }) => {
                 <div className="flex flex-col items-start text-sm ">
                   <p className="text-center text-gray-400">주차시간</p>
                   <p className={`text-${colors.primaryColor} text-lg`}>
-                    {convertTime(carInfo.createdAt.toString())}
+                    {calculateEnterTime(carInfo.createdAt.toString())}
                   </p>
                 </div>
                 <div className="flex flex-col items-start text-sm">
@@ -107,7 +136,7 @@ const Discount: NextPage<DiscountProps> = ({ carInfo, coupons }) => {
                         </p>
                         <button
                           className={`bg-${colors.primaryColor} text-md rounded-md px-4 py-1.5 text-white`}
-                          onClick={t}
+                          onClick={() => t(coupon)}
                         >
                           적용
                         </button>
@@ -121,24 +150,35 @@ const Discount: NextPage<DiscountProps> = ({ carInfo, coupons }) => {
             <div className="border-b border-b-black p-3">
               <h3 className="text-md font-bold">우리 매장 할인 내역</h3>
             </div>
-            <div className="flex justify-center p-14">
-              {tData && tData.data.length > 0 ? (
-                tData.data.map((x, index) => (
-                  <div key={index} className="my-2 flex w-full items-center">
-                    <div className="w-1/2">
-                      <p>{x.couponId}</p>
+            <div className="flex flex-col justify-center gap-3 p-3">
+              {discounts && discounts.length > 0 ? (
+                discounts
+                  .filter((x) => x.userId === 1)
+                  .map((x, index) => (
+                    <div
+                      key={index}
+                      className="flex items-center justify-between"
+                    >
+                      <p>{x.name}</p>
+                      <div className="flex items-center gap-10">
+                        <p>{x.count}회</p>
+                        <button
+                          className={`border border-${colors.primaryColor} text-${colors.primaryColor} rounded-sm px-3 py-0.5`}
+                        >
+                          취소
+                        </button>
+                      </div>
                     </div>
-                  </div>
-                ))
+                  ))
               ) : (
-                <>
+                <div className="flex justify-center p-8">
                   <p>
                     <span className={`text-${colors.primaryColor}`}>
                       할인 내역
                     </span>
                     이 없습니다.
                   </p>
-                </>
+                </div>
               )}
             </div>
           </div>
@@ -146,13 +186,27 @@ const Discount: NextPage<DiscountProps> = ({ carInfo, coupons }) => {
             <div className="border-b border-b-black p-3">
               <h3 className="text-md font-bold">총 할인 내역 및 적용 수량</h3>
             </div>
-            <div className="flex justify-center p-14">
-              <p className="font-semibold">
-                <span className={`text-${colors.primaryColor}`}>
-                  총 할인 내역
-                </span>
-                이 없습니다.
-              </p>
+            <div className="flex flex-col justify-center gap-3 p-3">
+              {/* {tdd && tdd.length > 0 ? (
+                tdd.map((x, index) => (
+                  <div
+                    key={index}
+                    className="flex items-center justify-between font-bold"
+                  >
+                    <p>{x.name}</p>
+                    <p>{x.count}회</p>
+                  </div>
+                ))
+              ) : (
+                <div className="flex justify-center p-8">
+                  <p className="font-semibold">
+                    <span className={`text-${colors.primaryColor}`}>
+                      총 할인 내역
+                    </span>
+                    이 없습니다.
+                  </p>
+                </div>
+              )} */}
             </div>
           </div>
         </div>
@@ -179,7 +233,6 @@ const Discount: NextPage<DiscountProps> = ({ carInfo, coupons }) => {
         </button>
       </div>
 
-      {/* ddddddddd */}
       <div
         className={`${
           popup ? "block " : "hidden "
@@ -204,13 +257,19 @@ const Discount: NextPage<DiscountProps> = ({ carInfo, coupons }) => {
                 </svg>
                 <p>
                   <span className={`text-${colors.primaryColor} font-semibold`}>
-                    3시간할인
+                    {coupon.name}
                   </span>
                   를(을)
                 </p>
                 <p>적용하시겠습니까?</p>
                 <p className="my-2 text-sm font-normal text-gray-400">
-                  현재 적용: 3시간할인 / 0회
+                  현재 적용:{" "}
+                  {tData?.data.map(
+                    (x, index) =>
+                      `${x.name} / ${x.count}회${
+                        index === tData.data.length - 1 ? "" : ", "
+                      }`
+                  )}{" "}
                 </p>
               </div>
               <div className="h-auto w-full p-4">
@@ -251,6 +310,7 @@ const Discount: NextPage<DiscountProps> = ({ carInfo, coupons }) => {
 
             <div className="flex w-full justify-center border-t">
               <button
+                type="button"
                 className="w-full border-r py-3 text-center"
                 onClick={closePopup}
               >
@@ -276,12 +336,25 @@ export async function getServerSideProps(context: NextPageContext) {
     },
   });
 
-  const coupons = await client.coupon.findMany({});
+  const coupons = await client.coupon.findMany();
+
+  const history = await fetch("http://localhost:3000/api/discount", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      enterId: Number(id),
+    }),
+  }).then((res) => res.json().then((data) => data));
+
+  console.log(history, "dsdsd");
 
   return {
     props: {
       carInfo: JSON.parse(JSON.stringify(carInfo)),
       coupons: JSON.parse(JSON.stringify(coupons)),
+      history: JSON.parse(JSON.stringify(history)),
     },
   };
 }

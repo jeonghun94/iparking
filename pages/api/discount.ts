@@ -1,33 +1,75 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import type { NextApiRequest, NextApiResponse } from "next";
 import client from "@libs/server/client";
-import { DisocuntHistory } from "@prisma/client";
+import { DiscountHistory } from "@prisma/client";
 
 type Data = {
   ok: boolean;
-  data: DisocuntHistory[];
+  data: DiscountHistory[];
 };
 
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Data>
 ) {
-  const { count, memo, enterId } = req.body;
+  const { count, memo, enterId, couponId } = req.body;
 
-  await client.disocuntHistory.create({
-    data: {
-      userId: 1,
-      couponId: 1,
-      memo,
-      enterId,
-    },
-  });
+  if (count && memo && enterId && couponId) {
+    await client.discountHistory.create({
+      data: {
+        userId: 1,
+        couponId,
+        memo,
+        enterId,
+      },
+    });
 
-  const disocuntHistory = await client.disocuntHistory.findMany({
+    console.log("create생성함");
+  }
+
+  const result: any = new Array();
+
+  const discountHistory = await client.discountHistory.groupBy({
+    by: ["couponId", "userId"],
     where: {
       enterId,
     },
+    _count: {
+      id: true,
+    },
   });
 
-  res.status(200).json({ ok: true, data: disocuntHistory });
+  for await (const history of discountHistory) {
+    const coupon = await client.coupon.findFirst({
+      where: {
+        id: history.couponId,
+        AND: {
+          DisocuntHistory: {
+            some: {
+              userId: history.userId,
+            },
+          },
+        },
+      },
+      select: {
+        name: true,
+        DisocuntHistory: {
+          where: {
+            userId: history.userId,
+          },
+          select: {
+            userId: true,
+          },
+        },
+      },
+    });
+
+    result.push({
+      count: history._count.id,
+      name: coupon?.name,
+      userId: coupon?.DisocuntHistory[0].userId,
+    });
+  }
+
+  res.status(200).json({ ok: true, data: result });
 }

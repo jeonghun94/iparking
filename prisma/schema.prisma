@@ -30,7 +30,7 @@ model User {
   avatar    String?
   createdAt DateTime          @default(now())
   updatedAt DateTime          @updatedAt
-  discounts DisocuntHistory[]
+  discounts DiscountHistory[]
 }
 
 model Enter {
@@ -41,7 +41,7 @@ model Enter {
   parkingLotId    Int
   createdAt       DateTime          @default(now())
   updatedAt       DateTime          @updatedAt
-  DisocuntHistory DisocuntHistory[]
+  DisocuntHistory DiscountHistory[]
 
   @@index([parkingLotId])
 }
@@ -53,10 +53,10 @@ model Coupon {
   value           Int
   createdAt       DateTime          @default(now())
   updatedAt       DateTime          @updatedAt
-  DisocuntHistory DisocuntHistory[]
+  DisocuntHistory DiscountHistory[]
 }
 
-model DisocuntHistory {
+model DiscountHistory {
   id        Int      @id @default(autoincrement())
   user      User     @relation(fields: [userId], references: [id])
   userId    Int

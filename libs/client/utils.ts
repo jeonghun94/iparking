@@ -40,3 +40,14 @@ export const convertTime = (value: string) => {
 
   return `${Math.floor(betweenTimeDay / 365)}년 전`;
 };
+
+export const calculateEnterTime = (createdAt: string) => {
+  const now = new Date();
+  const enterTime = new Date(createdAt);
+  const diff = now.getTime() - enterTime.getTime();
+  const hour = Math.floor(diff / (1000 * 60 * 60));
+  const min = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+  // const sec = Math.floor((diff % (1000 * 60)) / 1000);
+
+  return `${hour}시간 ${min}분`;
+};
