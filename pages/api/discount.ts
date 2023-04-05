@@ -12,22 +12,23 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Data>
 ) {
+  const result: any = [];
   const { count, memo, enterId, couponId } = req.body;
 
-  if (count && memo && enterId && couponId) {
+  console.log(count, memo, enterId, couponId, "sds");
+
+  if (count && enterId && couponId) {
     await client.discountHistory.create({
       data: {
         userId: 1,
         couponId,
-        memo,
+        memo: memo || "",
         enterId,
       },
     });
 
     console.log("create생성함");
   }
-
-  const result: any = new Array();
 
   const discountHistory = await client.discountHistory.groupBy({
     by: ["couponId", "userId"],

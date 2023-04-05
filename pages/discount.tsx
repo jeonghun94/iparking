@@ -1,22 +1,20 @@
-import Image from "next/image";
-import { useEffect, useState } from "react";
-import {
-  calculateEnterTime,
-  colors,
-  convertTime,
-  convertTimeIntl,
-} from "@libs/client/utils";
-import Layout from "@components/layout";
-import NoImage from "../public/no-image.jpeg";
-import { NextPage, NextPageContext } from "next";
-import { Coupon, DiscountHistory, Enter } from "@prisma/client";
 import client from "@libs/server/client";
+import { NextPage, NextPageContext } from "next";
+import { useState } from "react";
 import { useRouter } from "next/router";
-import { ParkingLotHeader } from "@components/parkingLotHeader";
+import { Coupon, Enter } from "@prisma/client";
 import { useForm } from "react-hook-form";
 import useMutation from "@libs/client/useMutation";
-import useSWR, { SWRConfig } from "swr";
-import css from "styled-jsx/css";
+import Layout from "@components/layout";
+import Image from "next/image";
+import NoImage from "../public/no-image.jpeg";
+import {
+  calculateEnterTime,
+  convertTimeIntl,
+  colors,
+} from "@libs/client/utils";
+import { ParkingLotHeader } from "@components/parkingLotHeader";
+
 interface DiscountProps {
   carInfo: Enter;
   coupons: Coupon[];
@@ -29,7 +27,7 @@ interface DiscountProps {
 interface countWithCoupon {
   count: number;
   name: string;
-  userId: number;
+  userId?: number;
 }
 
 interface DiscountResponse {
@@ -37,28 +35,31 @@ interface DiscountResponse {
   data: countWithCoupon[];
 }
 
-const Discount: NextPage<DiscountProps> = ({ carInfo, coupons, history }) => {
+const Discount: NextPage<DiscountProps> = ({
+  carInfo,
+  coupons,
+  history: { data: discountHistory },
+}) => {
   const router = useRouter();
-  const [discounts, setDiscounts] = useState<countWithCoupon[]>([]);
+  const { register, handleSubmit, reset } = useForm();
 
-  useEffect(() => setDiscounts(history.data), []);
-
-  // get object name in discounts
-  const getDiscountName = (name: string) => {
-    const discountName = discounts.find((discount) => discount.name === name);
-    return discountName ? discountName.count : 0;
-  };
-
-  console.log(discounts);
-
+  const totalDiscountsCount: countWithCoupon[] = [];
+  const [coupon, setCoupon] = useState({ id: 0, name: "" });
+  const [popup, setPopup] = useState(false);
   const [discount, { data: tData, loading }] =
     useMutation<DiscountResponse>("/api/discount");
 
-  const [coupon, setCoupon] = useState({ id: 0, name: "" });
+  discountHistory.map((item) => {
+    if (totalDiscountsCount.find((i) => i.name === item.name)) {
+      const a = totalDiscountsCount.find((i) => i.name === item.name);
+      if (a) a.count += item.count;
+    }
+    if (!totalDiscountsCount.find((i) => i.name === item.name)) {
+      totalDiscountsCount.push({ name: item.name, count: item.count });
+    }
+  });
 
-  const { register, handleSubmit, reset } = useForm();
-  const [popup, setPopup] = useState(false);
-  const t = (coupon: Coupon) => {
+  const handleCouponFoucs = (coupon: Coupon) => {
     setPopup(true);
     setCoupon({ id: coupon.id, name: coupon.name });
   };
@@ -136,7 +137,7 @@ const Discount: NextPage<DiscountProps> = ({ carInfo, coupons, history }) => {
                         </p>
                         <button
                           className={`bg-${colors.primaryColor} text-md rounded-md px-4 py-1.5 text-white`}
-                          onClick={() => t(coupon)}
+                          onClick={() => handleCouponFoucs(coupon)}
                         >
                           적용
                         </button>
@@ -151,8 +152,8 @@ const Discount: NextPage<DiscountProps> = ({ carInfo, coupons, history }) => {
               <h3 className="text-md font-bold">우리 매장 할인 내역</h3>
             </div>
             <div className="flex flex-col justify-center gap-3 p-3">
-              {discounts && discounts.length > 0 ? (
-                discounts
+              {discountHistory && discountHistory.length > 0 ? (
+                discountHistory
                   .filter((x) => x.userId === 1)
                   .map((x, index) => (
                     <div
@@ -187,8 +188,8 @@ const Discount: NextPage<DiscountProps> = ({ carInfo, coupons, history }) => {
               <h3 className="text-md font-bold">총 할인 내역 및 적용 수량</h3>
             </div>
             <div className="flex flex-col justify-center gap-3 p-3">
-              {/* {tdd && tdd.length > 0 ? (
-                tdd.map((x, index) => (
+              {totalDiscountsCount && totalDiscountsCount.length > 0 ? (
+                totalDiscountsCount.map((x, index) => (
                   <div
                     key={index}
                     className="flex items-center justify-between font-bold"
@@ -206,7 +207,7 @@ const Discount: NextPage<DiscountProps> = ({ carInfo, coupons, history }) => {
                     이 없습니다.
                   </p>
                 </div>
-              )} */}
+              )}
             </div>
           </div>
         </div>
@@ -347,8 +348,6 @@ export async function getServerSideProps(context: NextPageContext) {
       enterId: Number(id),
     }),
   }).then((res) => res.json().then((data) => data));
-
-  console.log(history, "dsdsd");
 
   return {
     props: {
